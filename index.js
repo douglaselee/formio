@@ -13,6 +13,9 @@ var events = require('events');
 var Q = require('q');
 var nunjucks = require('nunjucks');
 var util = require('./src/util/util');
+var multiparty = require('multiparty');
+var fs = require('fs');
+
 // Keep track of the formio interface.
 router.formio = {};
 
@@ -253,6 +256,31 @@ module.exports = function(config) {
           swagger(req, router, function(spec) {
             res.json(spec);
           });
+        });
+
+        // Upload file from File component
+        router.post('/api/files', function(req, res) {
+          var form = new multiparty.Form({uploadDir: './files'});
+          form.parse(req, function(err, fields, files) {
+            if (err) {
+              return res.status(400).send('File was not uploaded');
+            }
+            fs.renameSync('./files/' + files.file[0].path.substring(5), './files/' + fields.name[0]);
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Received file');
+          });
+        });
+
+        // Delete file from File component
+        router.delete('/api/files/:file', function(req, res) {
+          try {
+            fs.unlinkSync('./files/' + req.params.file);
+          }
+          catch(exception) {
+            return res.status(404).send('File not found');
+          }
+          res.setHeader('Content-Type', 'text/plain');
+          res.end('Deleted file');
         });
 
         // Add the templates.

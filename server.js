@@ -48,6 +48,9 @@ module.exports = function(options) {
     express: app
   });
 
+  // Mount files from File component
+  app.use('/api/files', express.static(__dirname + '/files'));
+
   // Mount the client application.
   app.use('/', express.static(__dirname + '/client/dist'));
 
