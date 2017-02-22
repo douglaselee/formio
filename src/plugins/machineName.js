@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 
+//noinspection JSUnresolvedVariable
 module.exports = exports = function(schema, options) {
   // Add the machineName param.
   schema.add({
