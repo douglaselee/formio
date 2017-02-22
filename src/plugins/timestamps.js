@@ -24,7 +24,11 @@ module.exports = exports = function(schema, options) {
 
   // On pre-save, we will update the modified date.
   schema.pre('save', function(next) {
-    this.modified = new Date();
+    // Hack so submission access can be updated without updating modified timestamp
+    if (this.deleted === 0)
+      this.deleted   = null;
+    else
+      this.modified  = new Date();
     next();
   });
 };

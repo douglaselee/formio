@@ -449,6 +449,15 @@ module.exports = function(router) {
         return false;
       }
 
+      // Hack so anyone can see lists of forms and resources
+      if (user
+          &&  method      === "GET"
+          &&  entity.id   === ""
+          &&  entity.type === "form") {
+        debug.permissions('Hack so anyone can see lists of resources and forms, Access Granted!');
+        return true
+      }
+
       // The return value of user access.
       var _hasAccess = false;
 
@@ -461,7 +470,7 @@ module.exports = function(router) {
       };
 
       // Check if the user making the request owns the entity being requested.
-      if (
+      if ( false && // hack, turn this off
         user
         && access.hasOwnProperty(entity.type)
         && access[entity.type].hasOwnProperty('owner')
@@ -508,7 +517,7 @@ module.exports = function(router) {
               // OR, selfAccess was flagged, and the user is the entity.
               /* eslint-disable max-len */
               if (
-                (access[entity.type].hasOwnProperty('owner') && user && access[entity.type].owner === user)
+                (access[entity.type].hasOwnProperty('owner') && user && access[entity.type].owner === user.toString()) // need to stringify user!
                 || (req.selfAccess && user && access[entity.type].hasOwnProperty('_id') && user.toString() === access[entity.type]._id.toString())
               ) {
                 _hasAccess = true;
