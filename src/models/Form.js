@@ -29,6 +29,9 @@ module.exports = function(formio) {
       },
       type: {
         type: String,
+        enum: ['form', 'resource'],
+        required: true,
+        default: 'form',
         description: 'The form type.',
         index: true
       },
@@ -136,7 +139,7 @@ module.exports = function(formio) {
   var componentKeys = function(components) {
     var keys = [];
     util.eachComponent(components, function(component) {
-      if (!_.isUndefined(component.key)) {
+      if (!_.isUndefined(component.key) && !_.isNull(component.key)) {
         keys.push(component.key);
       }
     }, true);
