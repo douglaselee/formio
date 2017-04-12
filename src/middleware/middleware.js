@@ -9,6 +9,7 @@ module.exports = function(router) {
     bootstrapFormAccess: require('./bootstrapFormAccess')(router),
     bootstrapNewRoleAccess: require('./bootstrapNewRoleAccess')(router),
     bootstrapSubmissionAccess: require('./bootstrapSubmissionAccess')(router),
+    bootstrapSubmissionUpdatedBy: require('./bootstrapSubmissionUpdatedBy')(router),
     condensePermissionTypes: require('./condensePermissionTypes')(router),
     condenseSubmissionPermissionTypes: require('./condenseSubmissionPermissionTypes')(router),
     filterMongooseExists: require('./filterMongooseExists')(router),
