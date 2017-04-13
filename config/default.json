@@ -62,8 +62,8 @@
       },
       "sendgrid": {
         "auth": {
-          "api_user": "",
-          "api_key": ""
+          "api_user": "azure_45cb61759a07ec39abb95d11c91badc3@azure.com",
+          "api_key": "ogg4iogl"
         }
       },
       "mandrill": {
