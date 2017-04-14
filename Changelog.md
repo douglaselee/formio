@@ -5,13 +5,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-### Added
 
+## 1.16.6
 ### Changed
-
-### Fixed
+ - Changed export filename to include version.
+ - Changed export version to reference project version not export schema.
 
 ### Removed
+ - Removed plan from export.
+
+## 1.16.5
+### Added
+ - Template import / export tests
+ - git pre commit hooks for linting
+
+### Fixed
+ - Template action imports could fail based on resources not existing at creation time.
+ - customPrivate validations now work for components nested inside of layout components.
+
+### Removed
+ - Removed old template schema translations on import.
 
 ## 1.16.4
 ### Added
