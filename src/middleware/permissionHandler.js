@@ -456,7 +456,7 @@ module.exports = function(router) {
           &&  entity.id   === ""
           &&  entity.type === "form") {
         debug.permissions('Hack so anyone can see lists of resources and forms, Access Granted!');
-        return true
+        return true;
       }
 
       // The return value of user access.
@@ -471,14 +471,13 @@ module.exports = function(router) {
       };
 
       // Check if the user making the request owns the entity being requested.
-      if ( false && // hack, turn this off
-        user
+      if ( user
         && access.hasOwnProperty(entity.type)
         && access[entity.type].hasOwnProperty('owner')
         && req.token.user._id === access[entity.type].owner
       ) {
-        debug.permissions('This request is being made by the owner, Access Granted.');
-        _hasAccess = true;
+      //debug.permissions('This request is being made by the owner, Access Granted.');
+      //_hasAccess = true;
       }
 
       // Using the given method, iterate the 8 available entity access. Compare the given roles with the roles

@@ -286,7 +286,7 @@ module.exports = function(config) {
           try {
             fs.unlinkSync('./files/' + req.params.file);
           }
-          catch(exception) {
+          catch (exception) {
             return res.status(404).send('File not found');
           }
           res.setHeader('Content-Type', 'text/plain');
