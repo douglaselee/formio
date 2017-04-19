@@ -12,6 +12,7 @@ module.exports = function(router) {
   if (!router.formio.config.reservedForms || !router.formio.config.reservedForms.length) {
     /* eslint-disable max-len */
     router.formio.config.reservedForms = [
+      'api',
       'submission',
       'exists',
       'export',

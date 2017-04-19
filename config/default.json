@@ -9,6 +9,7 @@
   "mongo": "mongodb://localhost:27017/formioapp",
   "mongoSecret": "--- change me now ---",
   "reservedForms": [
+    "api",
     "submission",
     "exists",
     "export",
