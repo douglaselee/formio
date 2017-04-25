@@ -104,6 +104,10 @@ module.exports = function(config) {
           return next();
         }
 
+        if (res.headersSent) {
+          return next();
+        }
+
         corsRoute(req, res, next);
       });
 
