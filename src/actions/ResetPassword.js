@@ -293,7 +293,7 @@ module.exports = function(router) {
 
         // Generate a temporary token for resetting their password.
         var resetToken = jwt.sign(token, router.formio.config.jwt.secret, {
-          expiresIn: 5 * 60
+          expiresIn: 24 * 60 * 60
         });
 
         // Create the reset link and add it to the email parameters.
@@ -305,7 +305,7 @@ module.exports = function(router) {
         emailer.send(req, res, {
           transport: this.settings.transport,
           from: this.settings.from,
-          emails: username,
+          emails: submission.data.email,
           subject: this.settings.subject,
           message: this.settings.message
         }, _.assign(params, req.body), function() {
