@@ -356,9 +356,14 @@ module.exports = function(formio, items, done) {
       util.log('Creating root user account...'.green);
       prompt.get([
         {
+          name: 'name',
+          description: 'Enter your name for the root account.',
+          required: true
+        },
+        {
           name: 'email',
           description: 'Enter your email address for the root account.',
-          required: true
+          required: false
         },
         {
           name: 'password',
@@ -382,6 +387,7 @@ module.exports = function(formio, items, done) {
           formio.resources.submission.model.create({
             form: project.resources.admin._id,
             data: {
+              name: result.name,
               email: result.email,
               password: hash
             },
