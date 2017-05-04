@@ -67,8 +67,8 @@ module.exports = function(options) {
         var application = express();
         application.use('/', express.static(__dirname + '/app/dist'));
         config.appPort = config.appPort || 8080;
-        application.listen(config.appPort);
-        var appHost = 'http://localhost:' + config.appPort;
+        application.listen(config.appPort, config.host);
+        var appHost = 'http://' + config.host + ':' + config.appPort;
         util.log(' > Serving application at ' + appHost.green);
       }
 

@@ -2,7 +2,7 @@
   "port": 3001,
   "sslPort": 5454,
   "appPort": 8080,
-  "host": "localhost:3001",
+  "host": "localhost",
   "protocol": "http",
   "domain": "http://localhost:3001",
   "basePath": "",
