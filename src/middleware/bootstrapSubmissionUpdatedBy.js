@@ -37,6 +37,10 @@ module.exports = function(router) {
     _.set(req, 'body.metadata', {UpdatedBy: _.get(req, 'token.user._id')});
     debug('UpdatedBy set in metadata');
 
+    // Clear submission access to avoid conflicts
+    _.set(req, 'body.access', []);
+    debug('Submission access cleared');
+
     return next();
   };
 };
