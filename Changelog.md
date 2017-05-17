@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 1.17.6
+### Changed
+ - Submission Resource Access are calculated on the server during submission instead of in the browser.
+
+### Added
+ - Allow roles to have their own permissions appart from default owner permissions.
+
 ## 1.17.5
 ### Fixed
  - Make sure to not run the temp token tests for customer docker deployment test runs.
