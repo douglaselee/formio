@@ -363,7 +363,7 @@ Validator.prototype.buildIgnoreList = function(submission) {
    * @returns {boolean}
    */
   var checkComponentVisibility = function(component) {
-    if (!component.hasOwnProperty('key')) {
+    if (!component.hasOwnProperty('key') || component.hasOwnProperty('clearOnHide') && !component.clearOnHide) {
       return true;
     }
 
