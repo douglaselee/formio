@@ -183,6 +183,97 @@ module.exports = (router) => {
       });
   };
 
+  // Mark the action and its dependencies as needing to be kept
+  var keepAction = function(action, template) {
+    if (action.keep) {
+      return;
+    }
+
+    // Keep the action
+    action.keep = true;
+
+    // Keep the role referred to by the action
+    if (action.settings
+    &&  action.settings.role) {
+      template.roles[action.settings.role].keep = true;
+    }
+
+    // Keep the resources referred to by the action
+    /* eslint-disable no-use-before-define */
+    if (action.settings
+    &&  action.settings.resource) {
+      keepResource(action.settings.resource, template);
+    }
+    if (action.settings
+    &&  action.settings.resources) {
+      _.each(action.settings.resources, function(resource) {
+        keepResource(resource, template);
+      });
+    }
+    /* eslint-enable no-use-before-define */
+  };
+
+  // Mark the form or resource and its dependencies as needing to be kept
+  var keepResource = function(machineName, template) {
+    var entity =   template.forms[machineName];
+    if (entity === undefined) {
+        entity =   template.resources[machineName];
+    }
+    if (entity === undefined || entity.keep) {
+      return;
+    }
+
+    // Keep the form or resource
+    entity.keep = true;
+
+    // Keep the roles with form access
+    _.each(entity.access, function(access) {
+      _.each(access.roles, function(role) {
+        template.roles[role].keep = true;
+      });
+    });
+
+    // Keep the roles with submission access
+    _.each(entity.submissionAccess, function(access) {
+      _.each(access.roles, function(role) {
+        template.roles[role].keep = true;
+      });
+    });
+
+    // Keep the resources referred to by components
+    util.eachComponent(entity.components, function(component) {
+      if (component.type === 'resource') {
+        keepResource(component.resource, template);
+      }
+
+      if (component.type    === 'select'
+      &&  component.dataSrc === 'resource'
+      &&  component.data
+      &&  component.data.resource) {
+        keepResource(component.data.resource, template);
+      }
+    });
+
+    // Keep the actions that refer to this form or resource
+    _.each(template.actions, function(action, index) {
+      if (action.form === machineName) {
+        keepAction(action, template);
+      }
+    });
+  };
+
+  // Delete unmarked entities from collection object
+  var deleteUnmarked = function(entities) {
+    _.each(entities, function(entity, index) {
+      if (entity.keep) {
+        delete entity.keep;
+      }
+      else {
+        delete entities[index];
+      }
+    });
+  };
+
   /**
    * Export the formio template.
    *
@@ -214,6 +305,17 @@ module.exports = (router) => {
     ], template, map, options), (err) => {
       if (err) {
         return next(err);
+      }
+
+      if (options._id) {
+        // Mark what needs to be kept
+        keepResource(map.forms[options._id], template);
+
+        // Delete what doesn't
+        deleteUnmarked(template.roles);
+        deleteUnmarked(template.forms);
+        deleteUnmarked(template.resources);
+        deleteUnmarked(template.actions);
       }
 
       // Send the export.

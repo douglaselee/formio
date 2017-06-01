@@ -196,8 +196,8 @@ module.exports = function(config) {
         router.formio.cache = require('./src/cache/cache')(router);
 
         // Add the export function
-        router.get('/export', (req, res, next) => {
-          let options = router.formio.hook.alter('exportOptions', {}, req, res);
+        router.get('/export/:_id', (req, res, next) => {
+          let options = router.formio.hook.alter('exportOptions', {_id: req.params._id}, req, res);
           router.formio.template.export(options, (err, data) => {
             if (err) {
               return next(err.message || err);
@@ -271,6 +271,28 @@ module.exports = function(config) {
         router.get('/form/:formId/spec.json', function(req, res, next) {
           swagger(req, router, function(spec) {
             res.json(spec);
+          });
+        });
+
+        // Upload file from File component and import it
+        router.post('/api/import', function(req, res) {
+          var form = new multiparty.Form({uploadDir: './files'});
+          form.parse(req, function(err, fields, files) {
+            if (err) {
+              return res.status(400).send('File was not uploaded');
+            }
+
+            var template = JSON.parse(fs.readFileSync('./files/' + files.file[0].path.substring(5)));
+            var importer = require('./src/templates/import')(router);
+
+            importer.template(template, function(err, template) {
+              if (err) {
+                return res.status(400).send('File was not imported');
+              }
+
+              res.setHeader('Content-Type', 'text/plain');
+              res.end('Received file');
+            });
           });
         });
 
