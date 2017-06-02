@@ -282,7 +282,10 @@ module.exports = function(config) {
               return res.status(400).send('File was not uploaded');
             }
 
-            var template = JSON.parse(fs.readFileSync('./files/' + files.file[0].path.substring(5)));
+            var file     = './files/' + files.file[0].path.substring(5);
+            var json     = fs.readFileSync(file);
+            var deleted  = fs.unlinkSync(file);
+            var template = JSON.parse(json);
             var importer = require('./src/templates/import')(router);
 
             importer.template(template, function(err, template) {
