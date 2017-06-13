@@ -130,9 +130,16 @@ module.exports = (router) => {
           _map.forms[form._id.toString()] = machineName;
         });
 
-        // Now assign the resource components.
+        // Now assign the form and resource components.
         _.each(forms, function(form) {
           util.eachComponent(form.components, function(component) {
+            if (
+              (component.type === 'form') &&
+              (_map.forms && _map.forms.hasOwnProperty(component.form))
+            ) {
+              component.form = _map.forms[component.form];
+            }
+
             if (
               (component.type === 'resource') &&
               (_map.forms && _map.forms.hasOwnProperty(component.resource))
@@ -240,8 +247,12 @@ module.exports = (router) => {
       });
     });
 
-    // Keep the resources referred to by components
+    // Keep the forms and resources referred to by components
     util.eachComponent(entity.components, function(component) {
+      if (component.type === 'form') {
+        keepResource(component.form, template);
+      }
+
       if (component.type === 'resource') {
         keepResource(component.resource, template);
       }

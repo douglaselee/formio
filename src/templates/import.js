@@ -160,6 +160,11 @@ module.exports = (router) => {
   let componentMachineNameToId = (template, components) => {
     let changed = false;
     util.eachComponent(components, (component) => {
+      // Update form machineNames for form components.
+      if ((component.type === `form`) && formMachineNameToId(template, component)) {
+        changed = true;
+      }
+
       // Update resource machineNames for resource components.
       if ((component.type === `resource`) && resourceMachineNameToId(template, component)) {
         changed = true;
