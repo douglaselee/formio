@@ -277,7 +277,7 @@ Validator.prototype.sanitize = function(submission) {
    * @returns {boolean}
    */
   var checkComponentVisibility = function(component) {
-    if (!component.hasOwnProperty('key') || component.hasOwnProperty('clearOnHide') && !component.clearOnHide) {
+    if (!component.hasOwnProperty('key')) {
       return true;
     }
 
