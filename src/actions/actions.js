@@ -424,7 +424,7 @@ module.exports = function(router) {
                         type: 'textarea',
                         input: true,
                         key: 'custom',
-                        components: router.formio.util.flattenComponents(form.components),
+                        components: form.components,
                         placeholder: customPlaceHolder
                       }
                     ]
