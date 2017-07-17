@@ -19,6 +19,9 @@ var fs = require('fs');
 // Keep track of the formio interface.
 router.formio = {};
 
+// Use custom template delimiters.
+_.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+
 // Allow custom configurations passed to the Form.IO server.
 module.exports = function(config) {
   // Give app a reference to our config.
