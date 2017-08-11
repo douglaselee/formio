@@ -318,7 +318,7 @@ module.exports = (router) => {
         return next(err);
       }
 
-      if (options._id) {
+      if (options._id !== '0') {
         // Mark what needs to be kept
         keepResource(map.forms[options._id], template);
 
