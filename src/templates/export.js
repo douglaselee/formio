@@ -334,5 +334,18 @@ module.exports = (router) => {
     });
   };
 
+  // Add the export endpoint
+  router.get('/export/:_id', (req, res, next) => {
+    let options = hook.alter('exportOptions', {_id: req.params._id}, req, res);
+    exportTemplate(options, (err, data) => {
+      if (err) {
+        return next(err.message || err);
+      }
+
+      res.attachment(`${options.name}-${options.version}.json`);
+      res.end(JSON.stringify(data));
+    });
+  });
+
   return exportTemplate;
 };
