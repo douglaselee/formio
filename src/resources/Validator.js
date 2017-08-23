@@ -65,7 +65,7 @@ Validator.prototype.addValidator = function(schema, component, componentData) {
       component.components.forEach(function(itemComponent) {
         this.addValidator(objectSchema, itemComponent, _.get(componentData, component.key, componentData));
       }.bind(this));
-      fieldValidator = Joi.array().items(Joi.object(objectSchema));
+      fieldValidator = Joi.array().items(Joi.object(objectSchema)).options({stripUnknown: false});
       break;
     case 'container':
       component.components.forEach(function(itemComponent) {
@@ -181,7 +181,7 @@ Validator.prototype.addValidator = function(schema, component, componentData) {
 
   // Make sure to change this to an array if multiple is checked.
   if (component.multiple) {
-    fieldValidator = Joi.array().sparse().items(fieldValidator);
+    fieldValidator = Joi.array().sparse().items(fieldValidator).options({stripUnknown: false});
   }
 
   if (component.key && fieldValidator) {
@@ -198,44 +198,6 @@ Validator.prototype.addValidator = function(schema, component, componentData) {
  *   The data submission object.
  */
 Validator.prototype.sanitize = function(submission) {
-  /**
-   * Calculate whether the conditional settings evaluate to true or false.
-   *
-   * @private
-   */
-  var _evaluateConditional = function(conditional) {
-    var value = util.getValue(submission, conditional.when);
-
-    if (typeof value !== 'undefined' && typeof value !== 'object') {
-      // Check if the conditional value is equal to the trigger value
-      return value.toString() === conditional.eq.toString()
-        ? util.boolean(conditional.show)
-        : !util.boolean(conditional.show);
-    }
-    // Special check for check boxes component.
-    else if (typeof value !== 'undefined' && typeof value === 'object') {
-      // Only update the visibility is present, otherwise hide, because it was deleted by the submission sweep.
-      if (value.hasOwnProperty(conditional.eq)) {
-        return util.isBoolean(value[conditional.eq])
-          ? util.boolean(value[conditional.eq])
-          : true;
-      }
-      else {
-        return false;
-      }
-    }
-    // Check against the components default value, if present and the components hasnt been interacted with.
-    else if (typeof value === 'undefined' && conditional.hasOwnProperty('defaultValue')) {
-      return conditional.defaultValue.toString() === conditional.eq.toString()
-        ? util.boolean(conditional.show)
-        : !util.boolean(conditional.show);
-    }
-    // If there is no value, we still need to process as not equal.
-    else {
-      return !util.boolean(conditional.show);
-    }
-  };
-
   /**
    * Calculate whether custom logic evaluates to true or false.
    *
@@ -281,33 +243,11 @@ Validator.prototype.sanitize = function(submission) {
       return true;
     }
 
-    // We only care about valid/complete conditional settings.
-    if (
-      component.conditional
-      && (component.conditional.show !== null && component.conditional.show !== '')
-      && (component.conditional.when !== null && component.conditional.when !== '')
-    ) {
-      // Default the conditional values.
-      component.conditional.show = util.isBoolean(component.conditional.show)
-        ? util.boolean(component.conditional.show)
-        : true;
-      component.conditional.eq = component.conditional.eq || '';
-
-      var conditional = component.conditional;
-
-      // Store the components default value for conditional logic, if present.
-      if (component.hasOwnProperty('defaultValue')) {
-        conditional.defaultValue = component.defaultValue;
-      }
-      return _evaluateConditional(conditional);
-    }
-    // Custom conditional logic.
-    else if (component.customConditional) {
+    // Custom conditional logic. Need special case so the eval is isolated an in a sandbox
+    if (component.customConditional) {
       return _evaluateCustomConditional(component.customConditional);
     }
-
-    // If neither conditional nor custom logic is set, it is visibile.
-    return true;
+    return util.checkCondition(component, null, submission.data);
   };
 
   // Ensure this.form.components has a value.
