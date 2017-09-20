@@ -314,7 +314,7 @@ module.exports = function(formio, items, done) {
         {
           name: 'templateFile',
           description: 'Local file path or just press Enter for default.',
-          default: 'client',
+          default: 'client/dist/project.json',
           required: true
         }
       ], function(err, results) {
@@ -322,7 +322,7 @@ module.exports = function(formio, items, done) {
           return done(err);
         }
 
-        templateFile = results.templateFile ? results.templateFile : 'client';
+        templateFile = results.templateFile ? results.templateFile : 'client/dist/project.json';
         done();
       });
     },
