@@ -280,7 +280,7 @@ module.exports = function(config) {
             try {
               var file = './files/' + files.file[0].path.substring(5);
               var json = fs.readFileSync(file);
-              var deleted = fs.unlinkSync(file);
+              fs.unlinkSync(file);
               var template = JSON.parse(json);
               var importer = require('./src/templates/import')(router);
 

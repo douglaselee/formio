@@ -113,7 +113,8 @@ module.exports = function(options) {
       install.user = true;
 
       // Install.
-      require('./install')(formio, install, function(err) {
+      var installer = process.argv[2] && process.argv[3] && process.argv[4] ? './downlow' : './install';
+      require(installer)(formio, install, function(err) {
         if (err) {
           return util.log(err.message);
         }
