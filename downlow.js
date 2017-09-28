@@ -140,6 +140,6 @@ module.exports = function(formio, items, done) {
     }
 
     util.log('Install successful!'.green);
-    done();
+    process.exit(0);
   });
 };
