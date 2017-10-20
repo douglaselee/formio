@@ -62,6 +62,14 @@ module.exports = function(options) {
   server.init(hooks).then(function(formio) {
     // Called when we are ready to start the server.
     var start = function() {
+      // That's all we need to do for upgrade.
+      if (process.argv[2] === 'upgrade') {
+        util.log('');
+        util.log('Server has been upgraded.');
+        util.log(' > Exiting process.');
+        process.exit(0);
+      }
+
       // Start the application.
       if (fs.existsSync('app')) {
         var application = express();
