@@ -616,6 +616,14 @@ module.exports = function(router) {
       }
     }
 
+    // Check for file upload or delete
+    if (req.method === 'POST' || req.method === 'DELETE') {
+      if (req.url.search(/\/api\/files/) === 0) {
+        debug.permissions('Skipping');
+        return next();
+      }
+    }
+
     // Determine if we are trying to access and entity of the form or submission.
     router.formio.access.getAccess(req, res, function(err, access) {
       if (err) {
