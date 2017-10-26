@@ -70,6 +70,16 @@ module.exports = function(options) {
         process.exit(0);
       }
 
+      // That's all we need to do for reinstall.
+      if (process.argv[2]
+      &&  process.argv[3]
+      &&  process.argv[4]) {
+        util.log('');
+        util.log('Server has been reinstalled.');
+        util.log(' > Exiting process.');
+        process.exit(0);
+      }
+
       // Start the application.
       if (fs.existsSync('app')) {
         var application = express();
