@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.21.1
+### Fixed
+ - Issues with the machineKey not auto-incrementing and staying unique.
+
+### Added
+ - Ability to alter submission with a hook.
+ - Possibility to use underscore in API key.
+
 ## 1.21.0
 ### Changed
  - Upgraded many dependencies to latest versions.
