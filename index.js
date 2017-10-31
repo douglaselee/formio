@@ -272,6 +272,18 @@ module.exports = function(config) {
           });
         });
 
+        // Read version.txt and return contents
+        router.get('/version', function(req, res) {
+          try {
+            var version = fs.readFileSync('../version.txt');
+            res.setHeader('Content-Type', 'text/plain');
+            res.end(version);
+          }
+          catch (exception) {
+            return res.status(400).send({message: exception.message});
+          }
+        });
+
         // Upload file from File component and import it
         router.post('/api/import', function(req, res) {
           var form = new multiparty.Form({uploadDir: './files'});
