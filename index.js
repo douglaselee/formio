@@ -275,7 +275,7 @@ module.exports = function(config) {
         // Read version.txt and return contents
         router.get('/version', function(req, res) {
           try {
-            var version = fs.readFileSync('../version.txt');
+            var version = fs.readFileSync('version.txt');
             res.setHeader('Content-Type', 'text/plain');
             res.end(version);
           }
