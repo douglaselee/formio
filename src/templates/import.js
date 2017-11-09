@@ -398,7 +398,10 @@ module.exports = (router) => {
           }
 
           debug.install(document);
-          let query = entity.query ? entity.query(document, template) : {machineName: document.machineName};
+          let query = entity.query ? entity.query(document, template) : {
+            machineName: document.machineName,
+            deleted: {$eq: null}
+          };
 
           model.findOne(query, (err, doc) => {
             if (err) {
@@ -425,21 +428,6 @@ module.exports = (router) => {
               /* eslint-disable new-cap */
               return saveDoc(new model(document));
               /* eslint-enable new-cap */
-            }
-
-            // Check to see if a document exists, but is deleted.
-            if (doc.deleted) {
-              debug.install(`Deleted machine name found (${document.machineName})`);
-              // There exists an already deleted machine name. We need to create a new one.
-              return util.uniqueMachineName(document, model, function(err) {
-                if (err) {
-                  return next(err);
-                }
-
-                /* eslint-disable new-cap */
-                saveDoc(new model(document));
-                /* eslint-enable new-cap */
-              });
             }
             else {
               debug.install(`Existing found`);
