@@ -2885,7 +2885,7 @@ module.exports = function(app, template, hook) {
             }
 
             let apiUrl = 'http://localhost:' + template.config.port;
-            apiUrl += hook.alter('url', '/form/' + helper.template.forms['fruits']._id + '/submission', template);
+            apiUrl += hook.alter('url', '/form/' + helper.template.forms['fruits']._id + '/submission', helper.template);
 
             helper.form('fruitSelect', [
               {
@@ -2938,12 +2938,8 @@ module.exports = function(app, template, hook) {
         });
       });
 
-      it('Should throw an error when providing a value that is not available.', () => {
-        helper.submission('fruitSelect', {fruit: 'Foo'}).execute((err) => {
-          if (!err) {
-            return done('It should throw an error when providing a bad value.');
-          }
-
+      it('Should throw an error when providing a value that is not available.', (done) => {
+        helper.submission('fruitSelect', {fruit: 'Foo'}).execute(() => {
           assert.equal(helper.lastResponse.statusCode, 400);
           assert.equal(helper.lastResponse.body.name, 'ValidationError');
           assert.equal(helper.lastResponse.body.details.length, 1);
