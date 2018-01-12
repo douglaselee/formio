@@ -482,19 +482,41 @@ module.exports = (router) => {
       template.name = 'Export';
     }
 
-    async.series(hook.alter(`templateImportSteps`, [
-      async.apply(install(entities.role), template, template.roles, alter.role),
-      async.apply(install(entities.resource), template, template.resources, alter.form),
-      async.apply(install(entities.form), template, template.forms, alter.form),
-      async.apply(install(entities.action), template, template.actions, alter.action)
-    ], install, template), (err) => {
-      if (err) {
-        debug.template(err);
-        return done(err);
-      }
+    var messages = [];
 
-      done(null, template);
-    });
+    formio.resources.form.model.find({
+      machineName: {$in: _.keys(template.forms).concat(_.keys(template.resources))},
+      deleted: {$eq: null}
+    })
+      .lean(true)
+      .exec(function(err, forms) {
+        if (err) {
+          messages.push({message: err});
+          return done(messages);
+        }
+
+        _.each(forms, function(form, index) {
+          messages.push({message: 'Import would overwrite ' + form.type + ' ' + form.title});
+        });
+
+        if (messages.length > 0) {
+          return done(messages);
+        }
+
+        async.series(hook.alter(`templateImportSteps`, [
+          async.apply(install(entities.role), template, template.roles, alter.role),
+          async.apply(install(entities.resource), template, template.resources, alter.form),
+          async.apply(install(entities.form), template, template.forms, alter.form),
+          async.apply(install(entities.action), template, template.actions, alter.action)
+        ], install, template), (err) => {
+          if (err) {
+            debug.template(err);
+            return done(err);
+          }
+
+          done(null, template);
+        });
+      });
   };
 
   // Implement an import endpoint.

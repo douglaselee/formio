@@ -289,7 +289,7 @@ module.exports = function(config) {
           var form = new multiparty.Form({uploadDir: './files'});
           form.parse(req, function(err, fields, files) {
             if (err) {
-              return res.status(400).send('File was not uploaded');
+              return res.status(400).send([{message: err.message}]);
             }
 
             try {
@@ -309,7 +309,7 @@ module.exports = function(config) {
               });
             }
             catch (exception) {
-              return res.status(400).send({message: exception.message});
+              return res.status(400).send([{message: exception.message}]);
             }
           });
         });
