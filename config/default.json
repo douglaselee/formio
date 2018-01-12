@@ -29,8 +29,8 @@
   },
   "email": {
     "type": "sendgrid",
-    "username": "azure_45cb61759a07ec39abb95d11c91badc3@azure.com",
-    "password": "ogg4iogl"
+    "username": "",
+    "password": ""
   },
   "settings": {
     "office365": {
@@ -49,12 +49,42 @@
         "password": ""
       },
       "mssql": {
-        "host": "E5450-6\\GETSMART",
+        "host": "",
         "port": "1433",
-        "database": "UpdateSumTest",
-        "user": "node",
-        "password": "node"
+        "database": "",
+        "user": "",
+        "password": ""
       }
+    },
+    "resquel": {
+      "type": "mssql",
+      "db": {
+        "user": "",
+        "password": "",
+        "server": "",
+        "database": "",
+        "requestTimeout":"30000"
+        //"options": {
+        //  "instanceName": ""
+        //}
+      },
+      "routes": [
+        {
+          "method": "get",
+          "endpoint": "/employees",
+          "query": "SELECT * FROM [Employees];"
+        },
+        {
+          "method": "get",
+          "endpoint": "/employees/:iid",
+          "query": "SELECT * FROM [Employees] WHERE IID = {{ params.iid }};"
+        },
+        {
+          "method": "get",
+          "endpoint": "/employeeage",
+          "query": "SELECT * FROM [Employees] WHERE Age = {{ query.age }};"
+        }
+      ]
     },
     "email": {
       "gmail": {
@@ -65,8 +95,8 @@
       },
       "sendgrid": {
         "auth": {
-          "api_user": "azure_45cb61759a07ec39abb95d11c91badc3@azure.com",
-          "api_key": "ogg4iogl"
+          "api_user": "",
+          "api_key": ""
         }
       },
       "mandrill": {
