@@ -1,5 +1,4 @@
-Welcome to the Form.io application server!
+Welcome to the GlobalForms application server!
 
-  - Help: https://help.form.io
-  - Code: https://github.com/formio
-  - Love: https://form.io
+  - Help: http://knowledge.square-9.com/display/GF10/GlobalForms+10
+  - Support: 203-789-0889 Option 2 or support@square-9.com
