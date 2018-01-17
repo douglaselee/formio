@@ -1,20 +1,20 @@
 'use strict';
 
 // Setup the Form.IO server.
-var express = require('express');
-var cors = require('cors');
-var router = express.Router();
-var mongoose = require('mongoose');
+const express = require('express');
+const cors = require('cors');
+const router = express.Router();
+const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var _ = require('lodash');
-var events = require('events');
-var Q = require('q');
-var nunjucks = require('nunjucks');
-var util = require('./src/util/util');
-var multiparty = require('multiparty');
-var fs = require('fs');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+const _ = require('lodash');
+const events = require('events');
+const Q = require('q');
+const nunjucks = require('nunjucks');
+const util = require('./src/util/util');
+const multiparty = require('multiparty');
+const fs = require('fs');
 
 // Keep track of the formio interface.
 router.formio = {};
@@ -43,7 +43,7 @@ module.exports = function(config) {
    * Initialize the formio server.
    */
   router.init = function(hooks) {
-    var deferred = Q.defer();
+    const deferred = Q.defer();
 
     // Hooks system during boot.
     router.formio.hooks = hooks;
@@ -103,7 +103,7 @@ module.exports = function(config) {
       });
 
       // CORS Support
-      var corsRoute = cors(router.formio.hook.alter('cors'));
+      const corsRoute = cors(router.formio.hook.alter('cors'));
       router.use(function(req, res, next) {
         if (req.url === '/') {
           return next();
@@ -119,14 +119,14 @@ module.exports = function(config) {
       // Import our authentication models.
       router.formio.auth = require('./src/authentication/index')(router);
 
-      // The get token handler
-      if (!router.formio.hook.invoke('init', 'getTempToken', router.formio)) {
-        router.get('/token', router.formio.auth.tempToken);
-      }
-
       // Perform token mutation before all requests.
       if (!router.formio.hook.invoke('init', 'token', router.formio)) {
         router.use(router.formio.middleware.tokenHandler);
+      }
+
+      // The get token handler
+      if (!router.formio.hook.invoke('init', 'getTempToken', router.formio)) {
+        router.get('/token', router.formio.auth.tempToken);
       }
 
       // The current user handler.
@@ -153,7 +153,7 @@ module.exports = function(config) {
       router.formio.mongoose = mongoose;
 
       let mongoUrl = config.mongo;
-      let mongoOptions = {
+      const mongoOptions = {
         keepAlive: 120,
         useMongoClient: true
       };
@@ -192,7 +192,7 @@ module.exports = function(config) {
         };
 
         // Get the models for our project.
-        var models = require('./src/models/models')(router);
+        const models = require('./src/models/models')(router);
 
         // Load the Schemas.
         router.formio.schemas = _.assign(router.formio.schemas, models.schemas);
@@ -217,7 +217,7 @@ module.exports = function(config) {
               return res.status(404).send('Form not found');
             }
             // If query params present, filter components that match params
-            var filter = Object.keys(req.query).length !== 0 ? _.omit(req.query, ['limit', 'skip']) : null;
+            const filter = Object.keys(req.query).length !== 0 ? _.omit(req.query, ['limit', 'skip']) : null;
             res.json(
               _(util.flattenComponents(form.components))
               .filter(function(component) {
@@ -228,7 +228,7 @@ module.exports = function(config) {
                   if (!value) {
                     return prev && _.has(component, prop);
                   }
-                  var actualValue = _.property(prop)(component);
+                  const actualValue = _.property(prop)(component);
                   // loose equality so number values can match
                   return prev && actualValue == value || // eslint-disable-line eqeqeq
                     value === 'true' && actualValue === true ||
@@ -257,7 +257,7 @@ module.exports = function(config) {
         // Add the template functions.
         router.formio.template = require('./src/templates/index')(router);
 
-        var swagger = require('./src/util/swagger');
+        const swagger = require('./src/util/swagger');
         // Show the swagger for the whole site.
         router.get('/spec.json', function(req, res, next) {
           swagger(req, router, function(spec) {
@@ -293,7 +293,7 @@ module.exports = function(config) {
             }
 
             try {
-              var file = './files/' + files.file[0].path.substring(5);
+              var file = `./files/${files.file[0].path.substring(5)}`;
               var json = fs.readFileSync(file);
               fs.unlinkSync(file);
               var template = JSON.parse(json);
@@ -321,7 +321,7 @@ module.exports = function(config) {
             if (err) {
               return res.status(400).send('File was not uploaded');
             }
-            fs.renameSync('./files/' + files.file[0].path.substring(5), './files/' + fields.name[0]);
+            fs.renameSync(`./files/${files.file[0].path.substring(5)}`, `./files/${fields.name[0]}`);
             res.setHeader('Content-Type', 'text/plain');
             res.end('Received file');
           });
@@ -330,7 +330,7 @@ module.exports = function(config) {
         // Delete file from File component
         router.delete('/api/files/:file', function(req, res) {
           try {
-            fs.unlinkSync('./files/' + req.params.file);
+            fs.unlinkSync(`./files/${req.params.file}`);
           }
           catch (exception) {
             return res.status(404).send('File not found');

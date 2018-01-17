@@ -95,7 +95,7 @@ module.exports = (formio) => {
         required: true,
         validate: [
           {
-            message: 'The Name ' + uniqueMessage,
+            message: `The Name ${uniqueMessage}`,
             validator: (value) => !invalidRegex.test(value)
           },
           {
@@ -114,7 +114,7 @@ module.exports = (formio) => {
         trim: true,
         validate: [
           {
-            message: 'The Path ' + uniqueMessage,
+            message: `The Path ${uniqueMessage}`,
             validator: (value) => !invalidRegex.test(value)
           },
           {
@@ -155,10 +155,17 @@ module.exports = (formio) => {
       access: [formio.schemas.PermissionSchema],
       submissionAccess: [formio.schemas.PermissionSchema],
       owner: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.Mixed,
         ref: 'submission',
         index: true,
-        default: null
+        default: null,
+        set: owner => {
+          // Attempt to convert to objectId.
+          return formio.util.ObjectId(owner);
+        },
+        get: owner => {
+          return owner ? owner.toString() : owner;
+        }
       },
       components: {
         type: [mongoose.Schema.Types.Mixed],
@@ -208,8 +215,19 @@ module.exports = (formio) => {
       settings: {
         type: mongoose.Schema.Types.Mixed,
         description: 'Custom form settings object.'
+      },
+      properties: {
+        type: mongoose.Schema.Types.Mixed,
+        description: 'Custom form properties.'
       }
     })
+  });
+
+  // Add a partial index for deleted forms.
+  model.schema.index({
+    deleted: 1
+  }, {
+    partialFilterExpression: {deleted: {$eq: null}}
   });
 
   // Add machineName to the schema.

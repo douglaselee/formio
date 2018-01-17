@@ -44,7 +44,7 @@ else if (process.argv[2] === "--remove" && process.argv.length >= 4) {
     });
 }
 else if (process.argv[2] === "--run") {
-    var logStream = fs.createWriteStream(process.argv[1] + ".log");
+    var logStream = fs.createWriteStream(`${process.argv[1]}.log`);
     service.run(logStream, function() {
         service.stop(0);
     });
@@ -59,7 +59,7 @@ else if (process.argv[2] === "--run") {
     var util = require('./src/util/util');
     require('colors');
     require('./server')().then(function(state) {
-        util.log(' > Serving the Form.io API Platform at ' + state.config.domain.green);
+        util.log(` > Serving the Form.io API Platform at ${state.config.domain.green}`);
       //state.server.listen(state.config.port);
         http.createServer(state.server).listen(state.config.port, state.config.host);
         https.createServer(sslOpts, state.server).listen(state.config.sslPort, state.config.host);

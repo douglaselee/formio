@@ -4,6 +4,82 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.24.2
+### Fixed
+ - Issue where the metadata property for submissions was getting stripped out.
+ - DateTime component export.
+
+## 1.24.1
+### Changed
+ - Upgraded resourcejs to latest version.
+
+## 1.24.0
+### Changed
+ - Upgraded all dependencies.
+
+## 1.23.12
+### Changed
+ - Upgraded resourcejs to fix crash in index queries.
+
+## 1.23.11
+### Changed
+ - The owner property to be either a MongoID or a string with custom value.
+ - Converted some code into ES6 patterns.
+
+### Added
+ - Hook into the export capabilities.
+
+## 1.23.10
+### Fixed
+ - CSV export when Select component within DataGrid component.
+ - Do not replace the title and name during import if none are provided.
+
+### Added
+ - Custom Form properties.
+
+## 1.23.7
+### Changed
+ - Allow people to provide their form access settings on POST.
+
+### Fixed
+ - Issue with CSV export crashing on fields within a datagrid.
+
+## 1.23.6
+### Fixed
+ - Threading so that it will not block debugging ports.
+
+## 1.23.5
+### Fixed
+ - Make async validators work properly and move select to joi validation.
+ - Fix issue with importing subforms out of order.
+ - Move sub form validation and submission to the appropriate areas so it works in conjunction with other functionality.
+ - Hooks for tempTokens.
+
+## 1.23.3
+### Fixed
+ - Problems with using temp tokens with remote environments.
+ - Import order of subforms no longer crashes import.
+
+## 1.23.2
+### Fixed
+ - Issues with problematic aggresive resource caching.
+
+## 1.23.1
+### Changed
+ - Upgraded dependencies.
+
+## 1.23.0
+### Fixed
+ - Datetime fields to be stored as MongoDB Date objects.
+
+### Added
+ - Ability to alter models dynamically.
+ - Partial indexes for non-deleted entities.
+ - Ability to provide dynamic sub-forms from parent form submissions.
+
+### Changed
+ - Upgrade all dependencies.
+
 ## 1.22.19
 ### Changed
  - Made the editgrid validation not dependant on the multiple flag in component settings.
