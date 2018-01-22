@@ -12,6 +12,7 @@ module.exports = function(router) {
 
   // Manually update the handlers, to add additional middleware.
   handlers.beforePost = [
+    router.formio.middleware.permissionHandler,
     router.formio.middleware.filterMongooseExists({field: 'deleted', isNull: true}),
     router.formio.middleware.bootstrapEntityOwner(true),
     router.formio.middleware.bootstrapSubmissionAccess,
@@ -27,6 +28,7 @@ module.exports = function(router) {
     })
   ];
   handlers.beforeGet = [
+    router.formio.middleware.permissionHandler,
     router.formio.middleware.filterMongooseExists({field: 'deleted', isNull: true}),
     handlers.beforeGet
   ];
@@ -38,6 +40,7 @@ module.exports = function(router) {
     })
   ];
   handlers.beforePut = [
+    router.formio.middleware.permissionHandler,
     router.formio.middleware.filterMongooseExists({field: 'deleted', isNull: true}),
     router.formio.middleware.bootstrapEntityOwner(false),
     router.formio.middleware.bootstrapSubmissionAccess,
@@ -54,6 +57,7 @@ module.exports = function(router) {
     })
   ];
   handlers.beforeIndex = [
+    router.formio.middleware.permissionHandler,
     router.formio.middleware.setFilterQueryTypes,
     router.formio.middleware.filterMongooseExists({field: 'deleted', isNull: true}),
     router.formio.middleware.ownerFilter,
@@ -68,6 +72,7 @@ module.exports = function(router) {
     })
   ];
   handlers.beforeDelete = [
+    router.formio.middleware.permissionHandler,
     router.formio.middleware.filterMongooseExists({field: 'deleted', isNull: true}),
     handlers.beforeDelete,
     router.formio.middleware.deleteSubmissionHandler
