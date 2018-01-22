@@ -6,7 +6,7 @@
   "protocol": "http",
   "domain": "http://localhost:3001",
   "basePath": "",
-  "mongo": "mongodb://localhost:27017/GlobalForms",
+  "mongo": "mongodb://localhost:27017/ExpenseReport",
   "mongoSecret": "--- change me now ---",
   "reservedForms": [
     "version",
@@ -29,8 +29,8 @@
   },
   "email": {
     "type": "sendgrid",
-    "username": "",
-    "password": ""
+    "username": "azure_45cb61759a07ec39abb95d11c91badc3@azure.com",
+    "password": "ogg4iogl"
   },
   "settings": {
     "office365": {
@@ -49,40 +49,40 @@
         "password": ""
       },
       "mssql": {
-        "host": "",
+        "host": "E5450-6\\GETSMART",
         "port": "1433",
-        "database": "",
-        "user": "",
-        "password": ""
+        "database": "UpdateSumTest",
+        "user": "node",
+        "password": "node"
       }
     },
     "resquel": {
       "type": "mssql",
       "db": {
-        "user": "",
-        "password": "",
-        "server": "",
-        "database": "",
+        "user": "node",
+        "password": "node",
+        "server": "E5450-6\\GETSMART",
+        "database": "UpdateSumTest",
         "requestTimeout":"30000"
         //"options": {
-        //  "instanceName": ""
+        //  "instanceName": "getsmart"
         //}
       },
       "routes": [
         {
           "method": "get",
-          "endpoint": "/employees",
-          "query": "SELECT * FROM [Employees];"
+          "endpoint": "/flintstones",
+          "query": "SELECT * FROM [FlintStones];"
         },
         {
           "method": "get",
-          "endpoint": "/employees/:iid",
-          "query": "SELECT * FROM [Employees] WHERE IID = {{ params.iid }};"
+          "endpoint": "/flintstones/:iid",
+          "query": "SELECT * FROM [FlintStones] WHERE IID = {{ params.iid }};"
         },
         {
           "method": "get",
-          "endpoint": "/employeeage",
-          "query": "SELECT * FROM [Employees] WHERE Age = {{ query.age }};"
+          "endpoint": "/flintstoneage",
+          "query": "SELECT * FROM [FlintStones] WHERE Age = {{ query.age }};"
         }
       ]
     },
@@ -95,8 +95,8 @@
       },
       "sendgrid": {
         "auth": {
-          "api_user": "",
-          "api_key": ""
+          "api_user": "azure_45cb61759a07ec39abb95d11c91badc3@azure.com",
+          "api_key": "ogg4iogl"
         }
       },
       "mandrill": {
