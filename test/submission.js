@@ -2654,6 +2654,62 @@ module.exports = function(app, template, hook) {
       });
     });
 
+    describe('Required multivalue fields', function() {
+      it('Returns an error when required multivalue fields are missing', function(done) {
+        var components = [
+          {
+            "input": true,
+            "tableView": true,
+            "inputType": "text",
+            "inputMask": "",
+            "label": "Text Field",
+            "key": "textField",
+            "placeholder": "",
+            "prefix": "",
+            "suffix": "",
+            "multiple": true,
+            "defaultValue": "",
+            "protected": false,
+            "unique": false,
+            "persistent": true,
+            "validate": {
+              "required": true,
+              "minLength": "",
+              "maxLength": "",
+              "pattern": "",
+              "custom": "",
+              "customPrivate": false
+            },
+            "conditional": {
+              "show": null,
+              "when": null,
+              "eq": ""
+            },
+            "type": "textfield"
+          }
+        ];
+        var values = {};
+
+        helper
+          .form('test', components)
+          .submission(values)
+          .submission(values)
+          .execute(function(err) {
+            if (err) {
+              return done(err);
+            }
+
+            var submission = helper.getLastSubmission();
+            assert.equal(helper.lastResponse.statusCode, 400);
+            assert.equal(helper.lastResponse.body.name, 'ValidationError');
+            assert.equal(helper.lastResponse.body.details.length, 1);
+            assert.equal(helper.lastResponse.body.details[0].message, '"textField" is required');
+            assert.deepEqual(helper.lastResponse.body.details[0].path, ['textField']);
+            done();
+          });
+      });
+    });
+
     describe('Unique Fields with multiple', function() {
       var components = [
         {
@@ -3092,6 +3148,256 @@ module.exports = function(app, template, hook) {
             }
             assert(res.body.data.fruit.hasOwnProperty('_id'), 'Must contain the _id.');
             assert.equal(1, Object.keys(res.body.data.fruit).length);
+            done();
+          });
+      });
+    });
+
+    describe('Advanced Conditions', () => {
+      it('Requires a conditionally required field from advanced conditions', function(done) {
+        var components = [
+          {
+            "properties": {},
+            "tags": [],
+            "labelPosition": "top",
+            "hideLabel": false,
+            "type": "textfield",
+            "conditional": {
+              "eq": "",
+              "when": null,
+              "show": ""
+            },
+            "validate": {
+              "customPrivate": false,
+              "custom": "",
+              "pattern": "",
+              "maxLength": "",
+              "minLength": "",
+              "required": false
+            },
+            "clearOnHide": true,
+            "hidden": false,
+            "persistent": true,
+            "unique": false,
+            "protected": false,
+            "defaultValue": "",
+            "multiple": false,
+            "suffix": "",
+            "prefix": "",
+            "placeholder": "",
+            "key": "test",
+            "label": "Test",
+            "inputMask": "",
+            "inputType": "text",
+            "tableView": true,
+            "input": true
+          },
+          {
+            "properties": {},
+            "tags": [],
+            "labelPosition": "top",
+            "hideLabel": false,
+            "type": "textfield",
+            "conditional": {
+              "eq": "",
+              "when": null,
+              "show": ""
+            },
+            "validate": {
+              "customPrivate": false,
+              "custom": "",
+              "pattern": "",
+              "maxLength": "",
+              "minLength": "",
+              "required": false
+            },
+            "clearOnHide": true,
+            "hidden": false,
+            "persistent": true,
+            "unique": false,
+            "protected": false,
+            "defaultValue": "",
+            "multiple": false,
+            "suffix": "",
+            "prefix": "",
+            "placeholder": "",
+            "key": "changeme",
+            "label": "Change me",
+            "inputMask": "",
+            "inputType": "text",
+            "tableView": true,
+            "input": true,
+            "logic": [
+              {
+                "name": "Test 2",
+                "trigger": {
+                  "javascript": "result = data.test === '2';",
+                  "type": "javascript"
+                },
+                "actions": [
+                  {
+                    "name": "Set Title to Two",
+                    "type": "property",
+                    "property": {
+                      "label": "Title",
+                      "value": "label",
+                      "type": "string"
+                    },
+                    "text": "Two"
+                  },
+                  {
+                    "name": "Set Required",
+                    "type": "property",
+                    "property": {
+                      "label": "Required",
+                      "value": "validate.required",
+                      "type": "boolean"
+                    },
+                    "state": true
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+
+        var values = {
+          test: '2'
+        };
+
+        helper
+          .form('advancedCond', components)
+          .submission(values)
+          .execute(function(err) {
+            if (err) {
+              return done(err);
+            }
+
+            var submission = helper.getLastSubmission();
+            assert(submission.isJoi);
+            assert.equal(submission.name, 'ValidationError');
+            assert.deepEqual(submission.details, [
+              {
+                context: {
+                  key: 'changeme',
+                  label: 'changeme'
+                },
+                message: '"changeme" is required',
+                path: ['changeme'],
+                type: 'any.required'
+              }
+            ]);
+            done();
+          });
+      });
+
+      it('Sets a value based on advanced conditions', function(done) {
+        var components = [
+          {
+            "properties": {},
+            "tags": [],
+            "labelPosition": "top",
+            "hideLabel": false,
+            "type": "textfield",
+            "conditional": {
+              "eq": "",
+              "when": null,
+              "show": ""
+            },
+            "validate": {
+              "customPrivate": false,
+              "custom": "",
+              "pattern": "",
+              "maxLength": "",
+              "minLength": "",
+              "required": false
+            },
+            "clearOnHide": true,
+            "hidden": false,
+            "persistent": true,
+            "unique": false,
+            "protected": false,
+            "defaultValue": "",
+            "multiple": false,
+            "suffix": "",
+            "prefix": "",
+            "placeholder": "",
+            "key": "test",
+            "label": "Test",
+            "inputMask": "",
+            "inputType": "text",
+            "tableView": true,
+            "input": true
+          },
+          {
+            "properties": {},
+            "tags": [],
+            "labelPosition": "top",
+            "hideLabel": false,
+            "type": "textfield",
+            "conditional": {
+              "eq": "",
+              "when": null,
+              "show": ""
+            },
+            "validate": {
+              "customPrivate": false,
+              "custom": "",
+              "pattern": "",
+              "maxLength": "",
+              "minLength": "",
+              "required": false
+            },
+            "clearOnHide": true,
+            "hidden": false,
+            "persistent": true,
+            "unique": false,
+            "protected": false,
+            "defaultValue": "",
+            "multiple": false,
+            "suffix": "",
+            "prefix": "",
+            "placeholder": "",
+            "key": "changeme",
+            "label": "Change me",
+            "inputMask": "",
+            "inputType": "text",
+            "tableView": true,
+            "input": true,
+            "logic": [
+              {
+                "name": "Test 1",
+                "trigger": {
+                  "javascript": "result = data.test === '1';",
+                  "type": "javascript"
+                },
+                "actions": [
+                  {
+                    "name": "Set Value",
+                    "type": "value",
+                    "value": "return 'Foo'"
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+
+        var values = {
+          test: '1'
+        };
+
+        helper
+          .form('advancedCond2', components)
+          .submission(values)
+          .execute(function(err) {
+            if (err) {
+              return done(err);
+            }
+
+            var submission = helper.getLastSubmission();
+            assert.equal(submission.data.test, '1');
+            assert.equal(submission.data.changeme, 'Foo');
             done();
           });
       });

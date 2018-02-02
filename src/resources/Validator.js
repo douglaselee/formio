@@ -505,6 +505,8 @@ class Validator {
     components.forEach((component) => {
       let fieldValidator = null;
 
+      this.applyLogic(component, componentData, submission.data);
+
       // The value is persistent if it doesn't say otherwise or explicitly says so.
       const isPersistent = !component.hasOwnProperty('persistent') || component.persistent;
 
@@ -698,6 +700,10 @@ class Validator {
         // Allow(null) was added since some text fields have empty strings converted to null when multiple which then
         // throws an error on re-validation. Allowing null fixes the issue.
         fieldValidator = JoiX.array().sparse().items(fieldValidator.allow(null)).options({stripUnknown: false});
+        // If a multi-value is required, make sure there is at least one.
+        if (component.validate && component.validate.required) {
+          fieldValidator = fieldValidator.min(1).required();
+        }
       }
 
       if (component.key && fieldValidator) {
@@ -707,6 +713,50 @@ class Validator {
     /* eslint-enable max-statements */
 
     return schema;
+  }
+
+  applyLogic(component, row, data) {
+    if (!component.logic || !Array.isArray(component.logic)) {
+      return;
+    }
+
+    component.logic.forEach(logic => {
+      const result = FormioUtils.checkTrigger(component, logic.trigger, row, data);
+
+      if (result) {
+        logic.actions.forEach(action => {
+          switch (action.type) {
+            case 'property':
+              FormioUtils.setActionProperty(component, action, row, data, component, result);
+              break;
+            case 'value':
+              try {
+                // Create the sandbox.
+                const sandbox = vm.createContext({
+                  data,
+                  row,
+                  component,
+                  result
+                });
+
+                // Execute the script.
+                const script = new vm.Script(action.value);
+                script.runInContext(sandbox, {
+                  timeout: 250
+                });
+
+                row[component.key] = sandbox.value.toString();
+              }
+              catch (e) {
+                debug.validator('Custom Logic Error: ');
+                debug.validator(e);
+                debug.error(e);
+              }
+              break;
+          }
+        });
+      }
+    });
   }
 
   /**
@@ -767,26 +817,25 @@ class Validator {
             // Walk up the path tree to determine if the component is hidden.
             const result = detail.path.reduce((result, key) => {
               result.path.push(key);
-              if (isNaN(key)) {
-                const component = components[result.path.join('.')];
 
-                // Form "data" keys don't have components.
-                if (component) {
-                  result.hidden = result.hidden ||
-                    !checkConditional(component,
-                      _.get(value, result.path.slice(0, result.path.length - 1)), result.submission, true);
+              const component = components[result.path.filter(isNaN).join('.')];
 
-                  const clearOnHide = util.isBoolean(component.clearOnHide) ?
-                    util.boolean(component.clearOnHide) : true;
+              // Form "data" keys don't have components.
+              if (component) {
+                result.hidden = result.hidden ||
+                  !checkConditional(component,
+                    _.get(value, result.path.slice(0, result.path.length - 1)), result.submission, true);
 
-                  if (clearOnHide && result.hidden) {
-                    _.unset(value, result.path);
-                  }
+                const clearOnHide = util.isBoolean(component.clearOnHide) ?
+                  util.boolean(component.clearOnHide) : true;
+
+                if (clearOnHide && result.hidden) {
+                  _.unset(value, result.path);
                 }
-                else {
-                  // Since this is a subform, change the submission object going to the conditionals.
-                  result.submission = _.get(value, result.path);
-                }
+              }
+              else {
+                // Since this is a subform, change the submission object going to the conditionals.
+                result.submission = _.get(value, result.path);
               }
 
               return result;
