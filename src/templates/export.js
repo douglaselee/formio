@@ -223,14 +223,18 @@ module.exports = (router) => {
     // Keep the roles with form access
     _.each(entity.access, function(access) {
       _.each(access.roles, function(role) {
-        template.roles[role].keep = true;
+        if (template.roles[role]) {
+            template.roles[role].keep = true;
+        }
       });
     });
 
     // Keep the roles with submission access
     _.each(entity.submissionAccess, function(access) {
       _.each(access.roles, function(role) {
-        template.roles[role].keep = true;
+        if (template.roles[role]) {
+            template.roles[role].keep = true;
+        }
       });
     });
 
