@@ -462,6 +462,10 @@ module.exports = (router) => {
               return saveDoc(new model(document));
               /* eslint-enable new-cap */
             }
+            else if (document.skipUpdate) {
+              items[machineName] = doc.toObject();
+              return next();
+            }
             else {
               debug.install(`Existing found`);
               doc = _.assign(doc, document);
@@ -515,10 +519,25 @@ module.exports = (router) => {
       template.name = 'Export';
     }
 
+    var keys     = [];
     var messages = [];
 
+    // Don't check for overwriting things we won't
+    _.each(template.forms, function(object, key) {
+      if (!object.skipUpdate) {
+        keys.push(key);
+      }
+    });
+
+    // Don't check for overwriting things we won't
+    _.each(template.resources, function(object, key) {
+      if (!object.skipUpdate) {
+        keys.push(key);
+      }
+    });
+
     formio.resources.form.model.find({
-      machineName: {$in: _.keys(template.forms).concat(_.keys(template.resources))},
+      machineName: {$in: keys},
       deleted: {$eq: null}
     })
       .lean(true)
