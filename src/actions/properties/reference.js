@@ -31,9 +31,11 @@ module.exports = router => {
     /* eslint-enable camelcase */
     childReq.method = method.toUpperCase();
 
-    const childRes = util.createSubResponse();
-    if (router.resourcejs.hasOwnProperty(childReq.url) && router.resourcejs[childReq.url].hasOwnProperty(method)) {
-      return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
+      const childRes = util.createSubResponse(() => {
+        return resolve([]);
+      });
+      if (router.resourcejs.hasOwnProperty(childReq.url) && router.resourcejs[childReq.url].hasOwnProperty(method)) {
         router.resourcejs[childReq.url][method].call(this, childReq, childRes, function(err) {
           if (!childRes.statusCode || childRes.statusCode < 300) {
             return resolve(childRes.resource.item);
@@ -42,11 +44,11 @@ module.exports = router => {
             return reject(childRes.statusMessage);
           }
         });
-      });
-    }
-    else {
-      return Promise.reject('Unknown resource handler.');
-    }
+      }
+      else {
+        return reject('Unknown resource handler.');
+      }
+    });
   };
 
   const setResource = function(component, path, req, res) {
@@ -68,17 +70,24 @@ module.exports = router => {
   };
 
   const getResource = function(component, path, req, res) {
+    const resource = _.get(res, 'resource.item');
+    if (!resource) {
+      return Promise.resolve();
+    }
     // Make sure to reset the value on the return result.
-    const compValue = _.get(res.resource.item.data, path);
+    const compValue = _.get(resource.data, path);
     if (compValue && req.resources && req.resources.hasOwnProperty(compValue._id)) {
-      _.set(res.resource.item.data, path, req.resources[compValue._id]);
+      _.set(resource.data, path, req.resources[compValue._id]);
     }
     return Promise.resolve();
   };
 
   return {
     afterGet: function(component, path, req, res) {
-      const resource = res.resource.item;
+      const resource = _.get(res, 'resource.item');
+      if (!resource) {
+        return Promise.resolve();
+      }
       const compValue = _.get(resource.data, path);
       if (compValue && compValue._id) {
         return loadReferences(component, path, [compValue._id], req, res)
@@ -93,8 +102,12 @@ module.exports = router => {
       }
     },
     afterIndex: function(component, path, req, res) {
+      const resources = _.get(res, 'resource.item');
+      if (!resources) {
+        return Promise.resolve();
+      }
       const _ids = [];
-      res.resource.item.map(resource => {
+      resources.map(resource => {
         const compValue = _.get(resource.data, path);
         if (compValue && compValue._id) {
           _ids.push(compValue._id);
@@ -102,12 +115,15 @@ module.exports = router => {
       });
       return loadReferences(component, path, _ids, req, res)
         .then(items => {
+          if (!items || !items.length) {
+            return;
+          }
           const mappedItems = {};
           items.forEach(item => {
             mappedItems[item._id] = item;
           });
 
-          res.resource.item.forEach(resource => {
+          resources.forEach(resource => {
             const compValue = _.get(resource.data, path);
             if (compValue && compValue._id) {
               if (mappedItems[compValue._id]) {

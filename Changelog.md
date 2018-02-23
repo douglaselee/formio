@@ -2,18 +2,28 @@
 All notable changes to this project will be documented in this file
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+and this project adheres to [Semantic Versioning](http://semver.org/)
+
+## 1.25.9
+### Fixed
+ - Issue where empty list of references would fail the request.
+
+## 1.25.8
+### Fixed
+ - Some potential undefined references causing crashes.
+ - A bunch of small bugs in CSV export.
 
 ## 1.25.7
 ### Fixed
  - Issue with the resource references index query taking too long and taking a lot of memory.
  - Problems with using cloneDeep on sub-requests which would gobble up memory.
 
-## 1.25.6
+## 1.25.8
 ### Fixed
  - Problems with sub-responses calling methods that do not exist.
 
 ### Changed
+ - Upgraded formiojs (2.29.5), nodemailer (4.5.0), nunjucks (3.1.0)
  - Upgraded mongoose to 5.0.6, formio.js to 2.29.2
 
 ## 1.25.4
