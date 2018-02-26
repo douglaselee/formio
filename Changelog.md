@@ -4,8 +4,16 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/)
 
+## 1.25.10
+### Fixed
+ - The filter and sort index queries for referenced fields.
+
 ## 1.25.9
 ### Fixed
+ - CSV exporter that would throw an error for DateTime components.
+ - Issue where hidden components that have a value set remove their parent containers or datagrids.
+ - Ensure sub-requests get their own cloned request paramters.
+ - Issue with the field parameter actions would execute twice unintentionally.
  - Issue where empty list of references would fail the request.
 
 ## 1.25.8
