@@ -28,7 +28,14 @@ module.exports = router => {
 
     if (router.resourcejs.hasOwnProperty(childReq.url) && router.resourcejs[childReq.url].hasOwnProperty(method)) {
       return new Promise((resolve, reject) => {
-        const childRes = util.createSubResponse();
+        const childRes = util.createSubResponse((err) => {
+          if (!childRes.statusCode || childRes.statusCode < 300) {
+            return resolve([]);
+          }
+          else {
+            return reject(err);
+          }
+        });
         router.resourcejs[childReq.url][method].call(this, childReq, childRes, () => {
           if (!childRes.statusCode || childRes.statusCode < 300) {
             return resolve(childRes.resource.item);
@@ -84,40 +91,43 @@ module.exports = router => {
    * @param orderByReference
    * @return {Array}
    */
-  const applyReferences = function(items, references, path, orderByReference) {
+  const applyReferences = function(items, references, path, limit, orderByReference) {
     // Do not apply if there are neither items nor references
     if (
       (!references || !references.length) ||
       (!items || !items.length)
     ) {
-      return [];
+      return items;
     }
 
     const newItems = [];
     const mappedItems = {};
+    const usedItems = {};
     if (orderByReference) {
-      // Remove all items that are referenced.
-      _.remove(items, (item) => {
+      // Get all items that are referenced.
+      _.each(items, (item) => {
         const compValue = _.get(item.data, path);
-        if (compValue && compValue._id) {
-          mappedItems[compValue._id] = item.toObject();
-          return true;
+        if (compValue && compValue._id && !mappedItems[compValue._id]) {
+          mappedItems[compValue._id] = item;
         }
-        return false;
       });
 
       // Add references first.
       references.forEach(reference => {
         if (mappedItems[reference._id]) {
           _.set(mappedItems[reference._id], `data.${path}`, reference);
-          newItems.push(mappedItems[reference._id]);
+          const item = mappedItems[reference._id];
+          usedItems[item._id] = true;
+          mappedItems[reference._id] = false;
+          newItems.push(item);
         }
       });
 
-      // Next add remainder of items.
-      items.forEach(item => {
-        _.set(item, `data.${path}`, _.pick(_.get(item, `data.${path}`), ['_id']));
-        newItems.push(item);
+      // Next add items that were not referenced.
+      _.each(items, (item) => {
+        if (!usedItems[item._id] && (newItems.length < limit)) {
+          newItems.push(item);
+        }
       });
     }
     else {
@@ -134,12 +144,37 @@ module.exports = router => {
           else {
             _.set(item, `data.${path}`, _.pick(_.get(item, `data.${path}`), ['_id']));
           }
-          newItems.push(item);
         }
+        newItems.push(item);
       });
     }
 
     return newItems;
+  };
+
+  /**
+   * Returns all the referenced ids within this resource.
+   *
+   * @param req
+   * @param path
+   */
+  const getSubIds = function(req, path) {
+    return new Promise((resolve, reject) => {
+      const submissionModel = req.submissionModel || router.formio.resources.submission.model;
+      submissionModel.find({
+        form: req.formId,
+        deleted: null
+      })
+        .distinct(`data.${path}._id`)
+        .exec((err, ids) => {
+          if (err) {
+            return reject(err);
+          }
+
+          return resolve(ids);
+        }
+      );
+    });
   };
 
   /**
@@ -154,7 +189,8 @@ module.exports = router => {
 
     // Look for filters.
     _.each(query, (value, param) => {
-      if (param.indexOf(`data.${path}.`) === 0) {
+      // Don't include the _id as a subQuery since this can be retrieved from the parent.
+      if ((param !== `data.${path}._id`) && (param.indexOf(`data.${path}.`) === 0)) {
         subQuery.subFilter = true;
         subQuery[param.replace(new RegExp(`^data\\.${path}\\.`), '')] = value;
         delete query[param];
@@ -236,23 +272,38 @@ module.exports = router => {
       // Determine if any filters or sorts are applied to elements within this path.
       req.subQuery = getSubQuery(req.query, path);
       if (req.subQuery.subFilter) {
-        delete req.subQuery.subFilter;
-        return loadReferences(component, path, req.subQuery, req, res).then(items => {
-          req.referenceItems = (items && items.length) ? items : [];
-          const refIds = _.map(req.referenceItems, (item) => (item._id.toString()));
-          let queryPath = `data.${path}._id`;
-          if (refIds && refIds.length > 1) {
-            queryPath += '__in';
-          }
-          if (!refIds || !refIds.length) {
-            req.query[queryPath] = '0';
-          }
-          else if (refIds.length === 1) {
-            req.query[queryPath] = refIds[0];
-          }
-          else {
-            req.query[queryPath] = refIds.join(',');
-          }
+        return getSubIds(req, path).then((resourceIds) => {
+          delete req.subQuery.subFilter;
+
+          /* eslint-disable camelcase */
+          req.subQuery._id__in = _.filter(resourceIds);
+          /* eslint-enable camelcase */
+
+          return loadReferences(component, path, req.subQuery, req, res).then(items => {
+            if (!req.referenceItems) {
+              req.referenceItems = {};
+            }
+            req.referenceItems[path] = (items && items.length) ? items : [];
+            // Make the limit huge so that we can get all duplicates, limits are establshied by the ID's of the
+            // references added to the query.
+            req.originalLimit = parseInt(req.query.limit, 10) || 10;
+            req.query.limit = 1000000000;
+
+            const refIds = _.map(req.referenceItems[path], (item) => (item._id.toString()));
+            let queryPath = `data.${path}._id`;
+            if (refIds && refIds.length > 1) {
+              queryPath += '__in';
+            }
+            if (!refIds || !refIds.length) {
+              req.query[queryPath] = '0';
+            }
+            else if (refIds.length === 1) {
+              req.query[queryPath] = refIds[0];
+            }
+            else {
+              req.query[queryPath] = refIds;
+            }
+          });
         });
       }
     },
@@ -263,21 +314,27 @@ module.exports = router => {
       }
 
       // If this request has reference items, even if empty.
-      if (req.hasOwnProperty('referenceItems')) {
+      if (req.referenceItems && req.referenceItems[path]) {
         // Apply the found references.
-        _.set(res, 'resource.item', applyReferences(resources, req.referenceItems, path, true));
+        _.set(res, 'resource.item', applyReferences(
+          resources,
+          req.referenceItems[path],
+          path,
+          req.originalLimit,
+          true
+        ));
       }
       else {
         // Add a filter to the subquery.
         /* eslint-disable camelcase */
-        req.subQuery._id__in = _.filter(_.map(resources, (resource) => {
+        req.subQuery._id__in = _.uniq(_.filter(_.map(resources, (resource) => {
           const _id = _.get(resource, `data.${path}._id`);
           return _id ? _id.toString() : null;
-        })).join(',');
+        })));
         /* eslint-enable camelcase */
 
         // Add a limit.
-        req.subQuery.limit = 10000000;
+        req.subQuery.limit = 1000000000;
         return loadReferences(component, path, req.subQuery, req, res).then(
           items => _.set(res, 'resource.item', applyReferences(resources, items, path))
         );
