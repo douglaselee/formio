@@ -8,6 +8,7 @@
  *
  * @type {exports}
  */
+const ActiveDirectory = require('activedirectory');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const util = require('../util/util');
@@ -219,7 +220,65 @@ module.exports = function(router) {
 
       user = user.toObject();
       if (!_.get(user.data, passField)) {
-        return next('Your account does not have a password. You must reset your password to login.');
+        var ad = new ActiveDirectory(router.formio.config.ldap);
+        ad.authenticate(user.data[userField], password, function(err, auth) {
+          if (err) {
+            return next(err.message);
+          }
+
+          if (!auth) {
+            return next('User or password was incorrect', {user: user});
+          }
+
+          // Load the form associated with this user record.
+          router.formio.resources.form.model.findOne({
+            _id: user.form,
+            deleted: {$eq: null}
+          }, function(err, form) {
+            if (err) {
+              return next(err);
+            }
+            if (!form) {
+              return next('User form not found.');
+            }
+
+            form = form.toObject();
+
+            // Allow anyone to hook and modify the user.
+            hook.alter('user', user, function hookUserCallback(err, _user) {
+              if (err) {
+                // Attempt to fail safely and not update the user reference.
+                debug.authenticate(err);
+              }
+              else {
+                // Update the user with the hook results.
+                debug.authenticate(user);
+                user = _user;
+              }
+
+              // Allow anyone to hook and modify the token.
+              const token = hook.alter('token', {
+                user: {
+                  _id: user._id
+                },
+                form: {
+                  _id: form._id
+                }
+              }, form);
+
+              // Continue with the token data.
+              next(null, {
+                user: user,
+                token: {
+                  token: getToken(token),
+                  decoded: token
+                }
+              });
+            });
+          });
+        });
+
+        return;
       }
 
       // Compare the provided password.
