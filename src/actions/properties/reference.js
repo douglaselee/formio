@@ -26,6 +26,14 @@ module.exports = router => {
     sub.req.skipOwnerFilter = false;
     sub.req.formId = sub.req.params.formId = formId;
 
+    // Make sure to change the submission id.
+    if (query._id) {
+      sub.req.subId = query._id;
+    }
+    else {
+      delete sub.req.subId;
+    }
+
     sub.req.url = '/form/:formId/submission';
     sub.req.query = query;
     sub.req.method = 'GET';
