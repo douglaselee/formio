@@ -462,7 +462,8 @@ module.exports = (router) => {
               return saveDoc(new model(document));
               /* eslint-enable new-cap */
             }
-            else if (document.skipUpdate || document.tags.find(tag => tag.toLowerCase() === 'hidden')) {
+            else if (document.skipUpdate
+                 ||  document.tags && document.tags.find(tag => tag.toLowerCase() === 'hidden')) {
               items[machineName] = doc.toObject();
               return next();
             }
@@ -524,14 +525,16 @@ module.exports = (router) => {
 
     // Don't check for overwriting things we won't
     _.each(template.forms, function(object, key) {
-      if (!object.skipUpdate && !object.tags.find(tag => tag.toLowerCase() === 'hidden')) {
+      if (!object.skipUpdate
+      && !(object.tags && object.tags.find(tag => tag.toLowerCase() === 'hidden'))) {
         keys.push(key);
       }
     });
 
     // Don't check for overwriting things we won't
     _.each(template.resources, function(object, key) {
-      if (!object.skipUpdate && !object.tags.find(tag => tag.toLowerCase() === 'hidden')) {
+      if (!object.skipUpdate
+      && !(object.tags && object.tags.find(tag => tag.toLowerCase() === 'hidden'))) {
         keys.push(key);
       }
     });

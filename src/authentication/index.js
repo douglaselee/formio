@@ -223,6 +223,9 @@ module.exports = function(router) {
         var ad = new ActiveDirectory(router.formio.config.ldap);
         ad.authenticate(user.data[userField], password, function(err, auth) {
           if (err) {
+            if (err.code === 49) {
+              return next('User or password was incorrect', {user: user});
+            }
             return next(err.message);
           }
 
