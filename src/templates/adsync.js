@@ -176,6 +176,11 @@ module.exports = (router) => {
               if (err.code === 'ENOTFOUND') {
                 return done('Error: url is incorrect in default.json file\'s ldap parameters');
               }
+              if (err.code === 'ETIMEDOUT') {
+                const part1 = 'AD server is not responding, please check that default.json file\'s ';
+                const part2 = 'ldap parameters are correct and that the AD server is up and running';
+                return done(part1 + part2);
+              }
               return done(err);
             }
 
@@ -359,6 +364,16 @@ module.exports = (router) => {
     /* eslint-enable no-console */
   }
 
+  function ldeMessage(err) {
+    err = err.lde_message;
+    if (err.search(/: (Ref|Ldap|Name)Err: DSID-/) === 8) {
+      const  part1 = 'Error synchronizing AD, please check that default.json file\'s ';
+      const  part2 = 'ldap parameters are correct and that the AD server is up and running';
+      return part1 + part2;
+    }
+    return err;
+  }
+
   // Run AD synchronization periodically if period specified
   if (formio.config.ldap
   &&  formio.config.ldap.interval
@@ -372,7 +387,7 @@ module.exports = (router) => {
         if (err) {
           // AD errors
           if (err.lde_message) {
-            err = err.lde_message;
+            err = ldeMessage(err);
           }
           // Mongoose errors
           if (err.message) {
@@ -398,7 +413,7 @@ module.exports = (router) => {
         if (err) {
           // AD errors
           if (err.lde_message) {
-            err = err.lde_message;
+            err = ldeMessage(err);
           }
           // Mongoose errors
           if (err.message) {
@@ -424,7 +439,7 @@ module.exports = (router) => {
         if (err) {
           // AD errors
           if (err.lde_message) {
-            err = err.lde_message;
+            err = ldeMessage(err);
           }
           // Mongoose errors
           if (err.message) {
