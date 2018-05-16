@@ -313,6 +313,45 @@ module.exports = function(config) {
           });
         });
 
+        // Upload file from File component and import it
+        router.post('/api/import/improve', function(req, res) {
+          try {
+            var data = req.body.data;
+            var file = `./files/${data.filetoImport[0].name}`;
+            var json = fs.readFileSync(file);
+          //fs.unlinkSync(file);
+            var template = JSON.parse(json);
+
+            // Mark template to handle additions
+            _.each(data.additions, function(addition) {
+              if (template.forms[addition.machineName]) {
+                  template.forms[addition.machineName][addition.action] = true;
+              }
+              if (template.resources[addition.machineName]) {
+                  template.resources[addition.machineName][addition.action] = true;
+              }
+            });
+
+            // Mark template to handle collisions
+            _.each(data.collisions, function(collision) {
+              if (template.forms[collision.machineName]) {
+                template.forms[collision.machineName][collision.action] = true;
+              }
+              if (template.resources[collision.machineName]) {
+                template.resources[collision.machineName][collision.action] = true;
+              }
+            });
+
+            var importer = require('./src/templates/import')(router);
+            importer.template(template, function(err, template) {
+              return res.status(200).send(err);
+            });
+          }
+          catch (exception) {
+            return res.status(400).send({message: exception.message});
+          }
+        });
+
         // Upload file from File component
         router.post('/api/files', function(req, res) {
           var form = new multiparty.Form({uploadDir: './files'});

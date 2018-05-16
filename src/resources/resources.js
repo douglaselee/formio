@@ -3,6 +3,7 @@
 module.exports = function(router) {
   const hook = require('../util/hook')(router.formio);
   return hook.alter('resources', {
+    project: require('./ProjectResource')(router),
     form: require('./FormResource')(router),
     submission: require('./SubmissionResource')(router),
     role: require('./RoleResource')(router)

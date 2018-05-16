@@ -235,7 +235,7 @@ module.exports = function(router) {
         }
 
         // Merge each component array if present in the component.
-        if (a.hasOwnProperty('components') || b.hasOwnProperty('component')) {
+        if (a.hasOwnProperty('components') || b.hasOwnProperty('components')) {
           const componentsA = a.components || [];
           const componentsB = b.components || [];
 

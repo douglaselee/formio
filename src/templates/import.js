@@ -96,11 +96,15 @@ module.exports = (router) => {
     if (!entity.hasOwnProperty(`form`)) {
       return false;
     }
-    if (template.hasOwnProperty(`forms`) && template.forms.hasOwnProperty(entity.form)) {
+    if (template.hasOwnProperty(`forms`)
+    &&  template.forms.hasOwnProperty(entity.form)
+    &&  template.forms[entity.form].hasOwnProperty('_id')) {
       entity.form = template.forms[entity.form]._id.toString();
       return true;
     }
-    if (template.hasOwnProperty(`resources`) && template.resources.hasOwnProperty(entity.form)) {
+    if (template.hasOwnProperty(`resources`)
+    &&  template.resources.hasOwnProperty(entity.form)
+    &&  template.resources[entity.form].hasOwnProperty('_id')) {
       entity.form = template.resources[entity.form]._id.toString();
       return true;
     }
@@ -457,6 +461,9 @@ module.exports = (router) => {
             };
 
             if (!doc) {
+              if (document.skipCreate) {
+                return next();
+              }
               debug.install(`Existing not found (${document.machineName})`);
               /* eslint-disable new-cap */
               return saveDoc(new model(document));
@@ -526,6 +533,9 @@ module.exports = (router) => {
     // Don't check for overwriting things we won't
     _.each(template.forms, function(object, key) {
       if (!object.skipUpdate
+      &&  !object.overwrite
+      &&  !object.skipCreate
+      &&  !object.create
       && !(object.tags && object.tags.find(tag => tag.toLowerCase() === 'hidden'))) {
         keys.push(key);
       }
@@ -534,6 +544,9 @@ module.exports = (router) => {
     // Don't check for overwriting things we won't
     _.each(template.resources, function(object, key) {
       if (!object.skipUpdate
+      &&  !object.overwrite
+      &&  !object.skipCreate
+      &&  !object.create
       && !(object.tags && object.tags.find(tag => tag.toLowerCase() === 'hidden'))) {
         keys.push(key);
       }
@@ -551,7 +564,19 @@ module.exports = (router) => {
         }
 
         _.each(forms, function(form, index) {
-          messages.push({message: `Import would overwrite ${form.type} ${form.title}`});
+          _.remove(keys, key => key === form.machineName);
+          messages.push({
+            message:    `Import would overwrite ${form.type} ${form.title}`,
+            action:     'rejectImport',
+            machineName: form.machineName});
+        });
+
+        _.each(keys, function(key, index) {
+          var form = template.forms[key] || template.resources[key];
+          messages.push({
+            message:    `Import would create ${form.type} ${form.title}`,
+            action:     'create',
+            machineName: key});
         });
 
         if (messages.length > 0) {

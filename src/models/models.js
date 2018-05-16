@@ -12,6 +12,7 @@ module.exports = function(router) {
     action: require('./Action')(router.formio),
     form: require('./Form')(router.formio),
     submission: require('./Submission')(router.formio),
+    project: require('./Project')(router.formio),
     role: require('./Role')(router.formio)
   });
 
