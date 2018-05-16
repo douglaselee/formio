@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/)
 
+## 1.29.1
+### Changed
+ - Upgraded resourcejs to v1.23.1 to fix issue with number filtering.
+
+## 1.29.0
+### Added
+ - Ability to calculate values of fields on server.
+
 ## 1.28.0
 ### Added
  - Unique validation for objects.
