@@ -1,5 +1,5 @@
 'use strict';
-const FormioUtils = require('formiojs/utils');
+const FormioUtils = require('formiojs/lib/utils').default;
 const _ = require('lodash');
 const util = require('../../util/util');
 const async = require('async');

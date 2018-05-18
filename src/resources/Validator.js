@@ -4,7 +4,7 @@ const vm = require('vm');
 const Joi = require('joi');
 const _ = require('lodash');
 const util = require('../util/util');
-const FormioUtils = require('formiojs/utils');
+const FormioUtils = require('formiojs/lib/utils').default;
 const request = require('request');
 const moment = require('moment');
 
