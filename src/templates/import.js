@@ -22,6 +22,7 @@ const debug = {
 module.exports = (router) => {
   const formio = router.formio;
   const hook = require(`../util/hook`)(formio);
+  const merge = require(`../middleware/mergeFormHandler`)(router);
 
   /**
    * A base alter used during import, if one wasn`t supplied for the entity.
@@ -476,9 +477,34 @@ module.exports = (router) => {
             }
             else {
               debug.install(`Existing found`);
-              doc = _.assign(doc, document);
-              debug.install(doc);
-              return saveDoc(doc);
+
+              if (document.merge) {
+                var req = {
+                  method: 'PUT',
+                  formId: doc._id,
+                  body: document,
+                  params: {},
+                  query: {}
+                };
+                var res = {
+                  header: function() {}
+                };
+                req.body.modified = req.body.modified || new Date();
+                req.body.data     = req.body.data     || {};
+                merge(req, res, function(err) {
+                  if (err) {
+                    return next(err);
+                  }
+                  doc = _.assign(doc, document);
+                  debug.install(doc);
+                  return saveDoc(doc);
+                });
+              }
+              else {
+                doc = _.assign(doc, document);
+                debug.install(doc);
+                return saveDoc(doc);
+              }
             }
           });
         });
@@ -536,6 +562,7 @@ module.exports = (router) => {
       &&  !object.overwrite
       &&  !object.skipCreate
       &&  !object.create
+      &&  !object.merge
       && !(object.tags && object.tags.find(tag => tag.toLowerCase() === 'hidden'))) {
         keys.push(key);
       }
@@ -547,6 +574,7 @@ module.exports = (router) => {
       &&  !object.overwrite
       &&  !object.skipCreate
       &&  !object.create
+      &&  !object.merge
       && !(object.tags && object.tags.find(tag => tag.toLowerCase() === 'hidden'))) {
         keys.push(key);
       }

@@ -322,23 +322,23 @@ module.exports = function(config) {
           //fs.unlinkSync(file);
             var template = JSON.parse(json);
 
-            // Mark template to handle additions
-            _.each(data.additions, function(addition) {
-              if (template.forms[addition.machineName]) {
-                  template.forms[addition.machineName][addition.action] = true;
+            // Mark template to handle creates
+            _.each(data.creates, function(create) {
+              if (template.forms[create.machineName]) {
+                  template.forms[create.machineName][create.action] = true;
               }
-              if (template.resources[addition.machineName]) {
-                  template.resources[addition.machineName][addition.action] = true;
+              if (template.resources[create.machineName]) {
+                  template.resources[create.machineName][create.action] = true;
               }
             });
 
-            // Mark template to handle collisions
-            _.each(data.collisions, function(collision) {
-              if (template.forms[collision.machineName]) {
-                template.forms[collision.machineName][collision.action] = true;
+            // Mark template to handle updates
+            _.each(data.updates, function(update) {
+              if (template.forms[update.machineName]) {
+                  template.forms[update.machineName][update.action] = true;
               }
-              if (template.resources[collision.machineName]) {
-                template.resources[collision.machineName][collision.action] = true;
+              if (template.resources[update.machineName]) {
+                  template.resources[update.machineName][update.action] = true;
               }
             });
 
