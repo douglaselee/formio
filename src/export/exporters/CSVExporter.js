@@ -5,7 +5,7 @@ const util = require('../../util/util');
 const {
   getInputMask,
   convertFormatToMoment,
-} = require('formiojs/lib/utils').default;
+} = require('formiojs/utils').default;
 const through = require('through');
 const csv = require('csv');
 const _ = require('lodash');
