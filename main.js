@@ -34,7 +34,7 @@ const ftpServer = new FtpSrv('ftp://0.0.0.0:21', {});
 
 ftpServer.on('login', function(data, resolve, reject) {
 //return reject('WTF!');
-  resolve({ root: '.', cwd: '.' });
+  resolve({root: '.', cwd: '.'});
 });
 
 ftpServer.listen().then(function() {
