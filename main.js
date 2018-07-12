@@ -18,22 +18,39 @@ require('./server')(hooks).then(function(state) {
   https.createServer(options, state.server).listen(state.config.sslPort, state.config.host);
 });
 
+/* eslint-disable camelcase */
 const tls       = require('tls');
 const opt       = {
+  pasv_url: '0.0.0.0',
   tls: {
     key:  './ssl/ftp/server.key',
-    cert: './ssl/ftp/server.crt',
-    ca:   './ssl/ftp/server.csr'
-  }
+    cert: './ssl/ftp/server.crt'
+  //ca:   './ssl/ftp/server.csr'
+  },
+  anonymous: true
 };
+/* eslint-enable camelcase */
 
-const context   = tls.createSecureContext(opt);
+//nst context   = tls.createSecureContext(opt);
 const FtpSrv    = require('ftp-srv');
-//nst ftpServer = new FtpSrv('ftps://0.0.0.0:990', opt);
-const ftpServer = new FtpSrv('ftp://0.0.0.0:21', {});
+const ftpSecure = new FtpSrv('ftps://0.0.0.0:990', opt);
+const ftpServer = new FtpSrv('ftp://0.0.0.0:21',   opt);
+
+ftpSecure.on('login', function(data, resolve, reject) {
+//return reject('rejected');
+  resolve({root: '.', cwd: '.'});
+});
+
+ftpSecure.listen().then(function() {
+  var v = 1;
+});
+
+ftpSecure.on('client-error', function(connection, context, error) {
+  var v = 1;
+});
 
 ftpServer.on('login', function(data, resolve, reject) {
-//return reject('WTF!');
+//return reject('rejected');
   resolve({root: '.', cwd: '.'});
 });
 
