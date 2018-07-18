@@ -15,6 +15,7 @@ const nunjucks = require('nunjucks');
 const util = require('./src/util/util');
 const multiparty = require('multiparty');
 const fs = require('fs');
+const resquel = require('resquel');
 
 // Keep track of the formio interface.
 router.formio = {};
@@ -76,34 +77,12 @@ module.exports = function(config) {
       // Add the database connection to the router.
       router.formio.db = db;
 
-      // Establish our url alias middleware.
-      if (!router.formio.hook.invoke('init', 'alias', router.formio)) {
-        router.use(router.formio.middleware.alias);
-      }
-
-      // Establish the parameters.
-      if (!router.formio.hook.invoke('init', 'params', router.formio)) {
-        router.use(router.formio.middleware.params);
-      }
-
-      // Add the db schema sanity check to each request.
-      router.use(router.formio.update.sanityCheck);
-
       // Add Middleware necessary for REST API's
       router.use(bodyParser.urlencoded({extended: true}));
       router.use(bodyParser.json({
         limit: '16mb'
       }));
       router.use(methodOverride('X-HTTP-Method-Override'));
-
-      // Error handler for malformed JSON
-      router.use(function(err, req, res, next) {
-        if (err instanceof SyntaxError) {
-          res.status(400).send(err.message);
-        }
-
-        next();
-      });
 
       // CORS Support
       const corsRoute = cors(router.formio.hook.alter('cors'));
@@ -117,6 +96,33 @@ module.exports = function(config) {
         }
 
         corsRoute(req, res, next);
+      });
+
+      // Set up routes to database resources
+      if (config.settings.resquel && config.settings.resquel.db && config.settings.resquel.db.server) {
+        router.use(resquel(config.settings.resquel));
+      }
+
+      // Establish our url alias middleware.
+      if (!router.formio.hook.invoke('init', 'alias', router.formio)) {
+        router.use(router.formio.middleware.alias);
+      }
+
+      // Establish the parameters.
+      if (!router.formio.hook.invoke('init', 'params', router.formio)) {
+        router.use(router.formio.middleware.params);
+      }
+
+      // Add the db schema sanity check to each request.
+      router.use(router.formio.update.sanityCheck);
+
+      // Error handler for malformed JSON
+      router.use(function(err, req, res, next) {
+        if (err instanceof SyntaxError) {
+          res.status(400).send(err.message);
+        }
+
+        next();
       });
 
       // Import our authentication models.

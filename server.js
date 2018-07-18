@@ -4,7 +4,6 @@
  * This is the Form.io application server.
  */
 const express = require('express');
-const resquel = require('resquel');
 const nunjucks = require('nunjucks');
 const fs = require('fs-extra');
 const util = require('./src/util/util');
@@ -48,11 +47,6 @@ module.exports = function(options) {
     autoescape: true,
     express: app
   });
-
-  // Set up routes to database resources
-  if (config.settings.resquel && config.settings.resquel.db && config.settings.resquel.db.server) {
-    app.use(resquel(config.settings.resquel));
-  }
 
   // Mount files from File component
   app.use('/api/files', express.static(`${__dirname}/files`));
