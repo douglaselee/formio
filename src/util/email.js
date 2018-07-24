@@ -13,6 +13,7 @@ const debug = {
 const rest = require('restler');
 const util = require('./util');
 const _ = require('lodash');
+const jwt = require('jsonwebtoken');
 const EMAIL_OVERRIDE = process.env.EMAIL_OVERRIDE;
 
 /**
@@ -160,6 +161,62 @@ module.exports = (formio) => {
         }));
       }
     });
+
+    // Create reset password token
+    replacements.push(new Promise((resolve, reject) => {
+      // IDs of Admin and User resources
+      var resources = [];
+
+      const model = formio.resources.form.model;
+      const query = {
+        type: 'resource',
+        name: {$in: ['admin', 'user']},
+        deleted: {$eq: null}
+      };
+
+      // Get id of Admin and User resource
+      model.find(query, (err, forms) => {
+        if (err) {
+          return resolve('');
+        }
+
+        // Retrieve ids of Admin and User resources
+        _.each(forms, form => {
+          resources.push(form._id);
+        });
+
+        if (resources.length !== 2) {
+          return resolve('');
+        }
+
+        const model = formio.resources.submission.model;
+        const query = {
+          'data.email': submission.data.email,
+          form: {$in: resources},
+          deleted: {$eq: null}
+        };
+
+        model.findOne(query, (err, user) => {
+          if (err || !user) {
+            return resolve('');
+          }
+
+          // Create a token.
+          const token = {
+            user: user,
+            form: {_id: user.form},
+            type: 'resetpass'
+          };
+
+          // Generate a temporary token for resetting their password.
+          params.resetToken = jwt.sign(token, formio.config.jwt.secret, {
+            expiresIn: 60 * 60
+          });
+
+          resolve('');
+        });
+      });
+    }));
 
     Promise.all(replacements).then(results => {
       // Get the parameters for the email.
