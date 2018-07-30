@@ -395,6 +395,7 @@ module.exports = function(router) {
       // Hack so anyone can see lists of forms and resources
       if (user
       &&  method      === "GET"
+      &&  entity
       &&  entity.id   === ""
       &&  entity.type === "form") {
         return true;
@@ -410,6 +411,7 @@ module.exports = function(router) {
 
       // Check if the user making the request owns the entity being requested.
       if ( user
+      &&   entity
       &&   access.hasOwnProperty(entity.type)
       &&   access[entity.type].hasOwnProperty('owner')
       &&   req.token.user._id === access[entity.type].owner
