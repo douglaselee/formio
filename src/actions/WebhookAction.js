@@ -160,6 +160,9 @@ module.exports = function(router) {
           options.password = _.get(settings, 'password');
         }
 
+        // Propagate token
+        options.headers = {'x-jwt-token': req.headers['x-jwt-token']};
+
         // Cant send a webhook if the url isn't set.
         if (!_.has(settings, 'url')) {
           return handleError('No url given in the settings');
@@ -175,13 +178,18 @@ module.exports = function(router) {
         };
 
         // Interpolate URL if possible
-        if (res && res.resource && res.resource.item && res.resource.item.data) {
-          url = FormioUtils.interpolate(url, res.resource.item.data);
+        if (res && res.resource && res.resource.item) {
+          url = FormioUtils.interpolate(url, res.resource.item);
         }
 
         // Fall back if interpolation failed
         if (!url) {
           url = this.settings.url;
+        }
+
+        // Make relative URLs absolute
+        if (url[0] === '/') {
+          url = router.formio.config.domain + url;
         }
 
         // Make the request.

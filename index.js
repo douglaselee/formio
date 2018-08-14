@@ -16,6 +16,7 @@ const util = require('./src/util/util');
 const multiparty = require('multiparty');
 const fs = require('fs');
 const resquel = require('resquel');
+const puppeteer = require('puppeteer');
 
 // Keep track of the formio interface.
 router.formio = {};
@@ -382,6 +383,33 @@ module.exports = function(config) {
           }
           res.setHeader('Content-Type', 'text/plain');
           res.end('Deleted file');
+        });
+
+        // Generate PDF that looks like viewing submission
+        router.all('/form/:formId/submission/:subId/pdf', function(req, res) {
+          puppeteer.launch().then(function(browser) {
+            browser.newPage().then(function(page) {
+              const token = req.headers['x-jwt-token'];
+              page.setExtraHTTPHeaders({'x-jwt-token': token}).then(function() {
+                var domain  = router.formio.config.domain;
+                var form    = req.params.formId;
+                var sub     = req.params.subId;
+                var url     = `${domain}/view/#!/form/${form}/submission/${sub}?x-jwt-token=${token}`;
+                var options = {waitUntil: ['domcontentloaded', 'networkidle0', 'networkidle2']};
+                page.goto(url, options).then(function(response) {
+                  if (response.status() !== 200) {
+                    return res.status(response.status()).send('Error generating PDF');
+                  }
+                  page.pdf({path: `./files/${sub}.pdf`}).then(function(buffer) {
+                    browser.close().then(function() {
+                      res.setHeader('Content-Type', 'text/plain');
+                      res.end('PDF generated');
+                    });
+                  });
+                });
+              });
+            });
+          });
         });
 
         // Say we are done.
