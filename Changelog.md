@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/)
 
+## 1.33.5
+### Changed
+ - Upgrade formiojs@3.4.0, resourcejs@1.25.3, mongodb@3.1.4, mongoose@5.2.10
+
+## 1.33.4
+### Changed
+ - Upgrade formiojs@3.3.6 resourcejs@1.25.2
+ - Allow usage of Unauthorized certificates for SMTP servers.
+
+## 1.33.3
+### Changed
+ - FOR-1533: Improved conditional Actions.
+
+### Added
+ - FOR-1556: Added timezone support for CSV downloads.
+
 ## 1.33.2
 ### Changed
  - Upgraded JSONStream@1.3.4, mongodb@3.1.3, mongoose@5.2.8

@@ -411,6 +411,13 @@ module.exports = (formio) => {
                 pass: _.get(settings, 'email.smtp.auth.pass')
               };
             }
+            if (
+              _.get(settings, 'email.smtp.allowUnauthorizedCerts', false)
+            ) {
+              _settings['tls'] = {
+                rejectUnauthorized: false
+              };
+            }
 
             transporter = nodemailer.createTransport(_settings);
           }
