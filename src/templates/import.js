@@ -605,8 +605,8 @@ module.exports = (router) => {
         _.each(forms, function(form, index) {
           _.remove(keys, key => key === form.machineName);
           messages.push({
-            message:    `Import would overwrite ${form.type} ${form.title}`,
-            action:     'rejectImport',
+            message:    `Import would update ${form.type} ${form.title}`,
+            action:     'skipUpdate',
             machineName: form.machineName});
         });
 
