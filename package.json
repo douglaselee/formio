@@ -1,6 +1,6 @@
 {
   "name": "formio",
-  "version": "1.33.5",
+  "version": "1.33.6",
   "description": "The formio server application.",
   "license": "SEE LICENSE IN LICENSE.txt",
   "main": "index.js",
@@ -47,7 +47,7 @@
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",
     "mongodb": "^3.1.4",
-    "mongoose": "^5.2.10",
+    "mongoose": "^5.2.13",
     "mssql": "^4.1.0",
     "multiparty": "^4.1.2",
     "mysql": "^2.16.0",
@@ -62,7 +62,7 @@
     "q": "^1.5.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
-    "resourcejs": "^1.25.3",
+    "resourcejs": "^1.25.4",
     "resquel": "^1.0.0",
     "restler": "^3.4.0",
     "semver": "^5.5.1",
@@ -71,11 +71,11 @@
   },
   "devDependencies": {
     "chance": "^1.0.11",
-    "eslint": "^5.4.0",
+    "eslint": "^5.5.0",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.3",
+    "nodemon": "^1.18.4",
     "pre-commit": "^1.2.2",
-    "supertest": "^3.1.0"
+    "supertest": "^3.3.0"
   },
   "directories": {
     "test": "test"
